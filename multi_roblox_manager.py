@@ -1451,8 +1451,13 @@ class GameView(tk.Frame):
             label = f"{name} \u00b7 Game" if name else f"Roblox {self.counter}"
             self.embed(hwnd, label, "game", name)
             minutes = self.app.take_afk_resume(name) if name else None
+            if minutes is None and name:
+                minutes = self.app.saved_afk(name)    # Anti-AFK was on for this account last time
             info = self.embedded.get(hwnd)
-            if minutes and info:                      # rejoined after a disconnect: AFK back on
+            saved_minutes = self.app.settings.get("afk_minutes", {}).get(name) if name else None
+            if info and saved_minutes:                # its own interval, even while AFK is off
+                info["afk"]["minutes"] = saved_minutes
+            if minutes and info:                      # AFK back on (rejoin / relaunch / reopen)
                 info["afk"].update(on=True, minutes=minutes)
                 self.afk_reschedule(info)
                 self.refresh_tab_label(info)
@@ -2242,6 +2247,7 @@ class GameView(tk.Frame):
                 info["afk"]["on"] = True
                 self.afk_reschedule(info)
                 self.refresh_tab_label(info)
+                self.app.remember_afk(info)
         self.load_afk_controls()
 
     # ----- switching what's shown (driven by the account list) -----
@@ -3983,10 +3989,18 @@ class App(tk.Tk):
         save_settings(self.settings)
 
     def remember_afk(self, info):
-        """Remember the interval you use for an account so a rejoin can reuse it."""
+        """Remember an account's Anti-AFK (on/off and interval), so its game gets the same
+        Anti-AFK again whenever it's launched, reopened or rejoined."""
         if info["kind"] == "game" and info["account"]:
             self.settings.setdefault("afk_minutes", {})[info["account"]] = info["afk"]["minutes"]
+            self.settings.setdefault("afk_on", {})[info["account"]] = bool(info["afk"]["on"])
             save_settings(self.settings)
+
+    def saved_afk(self, name):
+        """Minutes to switch Anti-AFK on with for this account's new game, or None if it was off."""
+        if name and self.settings.get("afk_on", {}).get(name):
+            return self.settings.get("afk_minutes", {}).get(name, 10)
+        return None
 
     def take_afk_resume(self, name):
         """Minutes to enable Anti-AFK with for a freshly rejoined game (once), else None."""

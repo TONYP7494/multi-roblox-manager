@@ -37,6 +37,10 @@ and can replay recorded mouse/keyboard macros on a schedule.
 
 ## What's new
 
+**v1.3**: Anti-AFK is remembered per account. If Anti-AFK was on for an account, its game gets
+Anti-AFK switched on again (with that account's own interval) whenever it's launched, reopened
+or rejoined, so you don't have to tick it again each time.
+
 **v1.2**: Hidden games left behind are brought back. If the app closed while a game was
 hidden in Game View (for example a crash while you were in Single view), that game kept
 running invisibly with no way to see or close it. Now, when the app starts, it finds such
@@ -156,6 +160,10 @@ its own timer, using a real key press (the only thing Roblox reacts to).
 | **Jump Now / Jump All** | Jump the current game / every game right now. |
 
 Anti-AFK briefly brings the game to the front to press the key, then gives focus back.
+
+**Remembered per account.** Each account remembers whether Anti-AFK was on and its interval. When
+that account's game opens again (launch, *Reopen last session* or auto-reconnect), Anti-AFK
+comes back on with the same interval. Switch it off and it stays off next time.
 
 ---
 
