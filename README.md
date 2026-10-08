@@ -37,6 +37,11 @@ and can replay recorded mouse/keyboard macros on a schedule.
 
 ## What's new
 
+**v1.2**: Hidden games left behind are brought back. If the app closed while a game was
+hidden in Game View (for example a crash while you were in Single view), that game kept
+running invisibly with no way to see or close it. Now, when the app starts, it finds such
+games, opens Game View and shows them as "Recovered game" so you can play or close them.
+
 **v1.1**: [Auto-reconnect](#auto-reconnect) now rejoins the game the account was actually in
 (the same private server, or the new game it moved to) instead of always using the saved link.
 
@@ -131,6 +136,10 @@ freeze the app itself.
 the same game or private server each one was in.
 
 **Closing the app** also closes the games that were open in Game View.
+
+**Recovered games.** If an earlier session left a game hidden (for example after a crash), the
+app finds it at start-up, opens Game View and shows it as "Recovered game" so you can play or
+close it. This is written to `error.log`.
 
 ---
 

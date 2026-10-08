@@ -353,6 +353,26 @@ def find_roblox_windows():
     return found
 
 
+def find_orphaned_games():
+    """Hidden Roblox game windows that still have the borderless style Game View gives docked
+    games: left behind by an earlier session that hid them (single view) and then closed without
+    giving them back. Nothing else would ever show or end them."""
+    found = []
+
+    def callback(hwnd, _lparam):
+        if not user32.IsWindowVisible(hwnd):
+            cls = ctypes.create_unicode_buffer(64)
+            user32.GetClassNameW(hwnd, cls, 64)
+            if (cls.value == "WINDOWSCLIENT" and _get_long(hwnd, GWL_STYLE) & WS_POPUP
+                    and process_exe(hwnd) == "robloxplayerbeta.exe"):
+                found.append(hwnd)
+        return True
+
+    proc = WNDENUMPROC(callback)
+    user32.EnumWindows(proc, 0)
+    return found
+
+
 def get_pid(hwnd):
     pid = wintypes.DWORD(0)
     user32.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
@@ -1437,6 +1457,12 @@ class GameView(tk.Frame):
                 self.afk_reschedule(info)
                 self.refresh_tab_label(info)
                 self.load_afk_controls()
+        for hwnd in find_orphaned_games():          # hidden games an earlier session left behind
+            if (hwnd in self.embedded or hwnd in self.released or hwnd in self.failed
+                    or user32.IsHungAppWindow(hwnd)):
+                continue
+            log_error(f"Brought back a hidden Roblox game left by an earlier session (process {get_pid(hwnd)}).")
+            self.embed(hwnd, "Recovered game", "game", None)
 
     def expect_browser(self, account, pid, snapshot, exe):
         self.expected.append({"account": account, "pid": pid, "snapshot": snapshot,
@@ -3808,6 +3834,7 @@ class App(tk.Tk):
         self.after(150, self.set_titlebar)
         self.after(3000, self.reconnect_tick)
         self.after(10000, self.track_open_accounts)
+        self.after(2000, self.recover_orphaned_games)
         self.after(2500, lambda: self.start_cleanup(manual=False))
         threading.Thread(target=self.reap_loop, daemon=True).start()
         threading.Thread(target=self.logwatch_loop, daemon=True).start()
@@ -5152,6 +5179,15 @@ class App(tk.Tk):
         picked = colorchooser.askcolor(color=color, parent=self, title=f"Colour for {name}")[1]
         if picked:
             self.set_account_border(name, color=picked, on=True)
+
+    def recover_orphaned_games(self):
+        """At start-up: hidden games left behind by an earlier session -> open Game View, whose
+        scan brings them back so you can see (and close) them."""
+        try:
+            if find_orphaned_games() and not self.game_view_open():
+                self.open_game_view()
+        except Exception:
+            log_error(traceback.format_exc())
 
     def account_text_color(self, i):
         """An account's name is shown in its border colour (normal colour if its border is off)."""
