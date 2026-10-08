@@ -5,7 +5,7 @@ It keeps your accounts in a list, launches each one into its own Roblox window, 
 side by side, keeps them from getting kicked for being idle, rejoins them when they disconnect,
 and can replay recorded mouse/keyboard macros on a schedule.
 
-> **Download:** grab `MultiRoblox.exe` from the [latest release](../../releases/latest). No install
+> **Download:** grab `MultiRoblox.exe` from the [latest release](https://github.com/TONYP7494/multi-roblox-manager/releases/latest). No install
 > needed, just run it. (Windows may show a SmartScreen warning because the exe isn't signed: click
 > *More info → Run anyway*.)
 
