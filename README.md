@@ -20,6 +20,7 @@ and can replay recorded mouse/keyboard macros on a schedule.
 
 ## Contents
 
+- [What's new](#whats-new)
 - [Quick start](#quick-start)
 - [Accounts](#accounts)
 - [Launching games](#launching-games)
@@ -31,6 +32,16 @@ and can replay recorded mouse/keyboard macros on a schedule.
 - [Where your data is stored](#where-your-data-is-stored)
 - [Building from source](#building-from-source)
 - [Safety notes](#safety-notes)
+
+---
+
+## What's new
+
+**v1.1**: [Auto-reconnect](#auto-reconnect) now rejoins the game the account was actually in
+(the same private server, or the new game it moved to) instead of always using the saved link.
+
+**v1.0**: First release. See the [Releases page](https://github.com/TONYP7494/multi-roblox-manager/releases)
+for every version.
 
 ---
 
@@ -148,6 +159,13 @@ Game ID / link):
   "lost connection". Normal server hops are not treated as a disconnect.
 - As a backup it checks the account's Roblox presence every 30 s and rejoins if the account has
   left the game.
+- **It rejoins the game the account was actually in**, read from Roblox's log (the same way
+  *Reopen last session* does):
+  - still in the private server from its saved link → back into that same private server;
+  - moved on to a different game → that game, not the saved one;
+  - nothing known → the saved link / Game ID.
+- The status shows which one it used, e.g. "reconnecting (saved link)..." or
+  "reconnecting (game 123...)...".
 - It stops after 5 attempts in 30 minutes so it can't loop forever.
 - **Turn on Anti-AFK after reconnecting** switches Anti-AFK back on for the rejoined game.
 - Every status change is written to `error.log`.
