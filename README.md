@@ -9,6 +9,13 @@ and can replay recorded mouse/keyboard macros on a schedule.
 > needed, just run it. (Windows may show a SmartScreen warning because the exe isn't signed: click
 > *More info → Run anyway*.)
 
+<p align="center">
+  <img src="screenshots/accounts-dark.png" alt="The main window in dark mode" width="340">
+  &nbsp;
+  <img src="screenshots/accounts-light.png" alt="The main window in light mode" width="340">
+</p>
+<p align="center"><em>The main window, in dark mode and light mode (example accounts).</em></p>
+
 ---
 
 ## Contents
@@ -52,7 +59,7 @@ Tip: launch accounts one at a time and let each Roblox window open before starti
 | **Remove** | Removes the selected account (and its browser profile). |
 | **Log in** | Opens that account's private browser profile on the Roblox login page. The app never sees what you type there. |
 | **Set Cookie** | Saves the account's `.ROBLOSECURITY` cookie (encrypted, see below) so the app can launch it directly. |
-| **Set Password / Copy User / Copy Pass** | Optionally store the username and password, and copy them to the clipboard when you need to type them. |
+| **Set Password / Copy User / Copy Pass** | Optionally store the username and password, and copy them to the clipboard when you need to type them. A copied password is cleared from the clipboard after 30 seconds. |
 | **Game ID box** | Each account remembers its **own** Game ID / game link / private-server link. The box shows the one for the selected account. |
 | **Enable / Disable Multi-Instance** | Roblox normally allows only one window at a time. Enabling this holds Roblox's lock so more windows can open. |
 | **Dark mode** | Switches the whole app to a dark theme (remembered). |
@@ -84,6 +91,9 @@ really is out of date it updates once, then launches.
 
 Click **Open Game View** to show the games (and browsers) inside the app, to the right of the
 account list. The games follow the window while you move or resize it.
+
+![Game View, before any game is launched](screenshots/game-view.png)
+*Game View before any game is launched: the toolbar and Anti-AFK strip are on top, and games appear in the big area.*
 
 | Control | What it does |
 |---|---|
@@ -149,11 +159,22 @@ Game ID / link):
 A TinyTask-style macro recorder. Show it with the **Recorder** button in the top bar; it appears
 under the account list.
 
+<p align="center">
+  <img src="screenshots/recorder-record.png" alt="Recorder, Record tab" width="340">
+  &nbsp;
+  <img src="screenshots/recorder-schedules.png" alt="Recorder, Schedules tab" width="340">
+</p>
+<p align="center"><em>The Recorder's Record tab, and a schedule that plays recordings on two accounts at :29 and :59.</em></p>
+
 **Record tab**
 
 - **F7** starts/stops recording, **F8** plays/stops (while the panel is open).
 - **Repeat** (number of times or **Forever**) and **Speed**.
 - **Save... / Load...** recordings as `.rec` files.
+- **Walk back to the start afterwards** plays the recording in reverse after each run, so the
+  character ends up where it started.
+- **Reset character before each run** presses Esc, R, Enter and waits a few seconds for the
+  respawn (only works in games that allow resetting).
 - **Reset camera zoom before each run** zooms the camera all the way in and back out a set amount
   before playing, so runs start from the same view.
 - It records **everything you type**, so don't type passwords while recording.
