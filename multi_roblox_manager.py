@@ -3692,6 +3692,7 @@ class App(tk.Tk):
         self.reconnect_q = queue.Queue()
         self.lost_q = queue.Queue()        # "lost connection" seen in an account's Roblox log
         self.logwatch_targets = {}         # user id -> account, for the log watcher thread
+        self.reconnect_where = {}          # account -> {"place", "private"}: where its game was
         self.clean_q = queue.Queue()
         self.direct_launch = tk.BooleanVar(value=bool(self.settings.get("direct_launch_v5", True)))
         self.auto_update = tk.BooleanVar(value=bool(self.settings.get("auto_update_roblox", True)))
@@ -3994,6 +3995,8 @@ class App(tk.Tk):
             try:
                 for uid, (when, reason) in watcher.scan(set(targets)).items():
                     self.lost_q.put((targets[uid], when, reason))
+                for uid, where in watcher.where(set(targets)).items():
+                    self.reconnect_where[targets[uid]] = where     # for rejoining the right game
             except Exception:
                 log_error(traceback.format_exc())
 
@@ -4111,6 +4114,18 @@ class App(tk.Tk):
                 self.do_reconnect(name)
         self.refresh_reconnect_ui()
 
+    def reconnect_target(self, name, game, target):
+        """Where to rejoin, from Roblox's own log (same rule as Reopen last session):
+        - still inside the private server from its link (also after moving between that game's
+          areas): back through the link, so it lands in the same private server;
+        - moved on to a different game: that game;
+        - nothing known: the link / game ID, or the last game Roblox's presence reported."""
+        where = self.reconnect_where.get(name) or self.open_where.get(name) or {}
+        place = where.get("place")
+        if target and target[0] in ("private", "share"):
+            return str(place) if place and not where.get("private") else game
+        return str(place) if place else (self.ensure_state(name).get("last_place") or game)
+
     def do_reconnect(self, name):
         st = self.ensure_state(name)
         now = time.time()
@@ -4126,16 +4141,13 @@ class App(tk.Tk):
             target = parse_target(game)
         except RobloxError:
             target = None
-        if target and target[0] in ("private", "share"):
-            gid = game                                   # always go back to the same private server
-        else:
-            gid = st.get("last_place") or game
+        gid = self.reconnect_target(name, game, target)
         if not cookie or not gid:
             return
         st["attempts"].append(now)
         st["misses"] = 0
         st["launched_at"] = now
-        st["status"] = "reconnecting..."
+        st["status"] = ("reconnecting (saved link)..." if gid == game else f"reconnecting (game {gid})...")
         if self.afk_after_var.get():
             minutes = self.settings.get("afk_minutes", {}).get(name, 10)
             if self.gameview is not None and self.gameview.winfo_exists():
